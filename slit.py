@@ -1,7 +1,8 @@
 import pandas as pd
 import streamlit as st
 from streamlit_option_menu import option_menu
-
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 
 with st.sidebar:
@@ -23,7 +24,22 @@ if choose=="Data Check":
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         st.write(df)
-        target_var = st.text_input("Target_Column", "target")
-        if target_var:
-            st.write("The Target column chosen is :",target_var)
-            st.write(df[target_var].value_counts())
+        l_col,r_col=st.columns(2)
+        with l_col:
+            target_var = st.text_input("Target_Column", "target")
+
+        with r_col:
+            genre = st.radio("Classification or Regression",('Classification', 'Regression'))
+
+
+        if genre=='Classification':
+            fig = plt.figure(figsize=(10, 4))
+            sns.countplot(x=target_var,data=df)
+            st.pyplot(fig)
+
+        if genre == "Regression":
+            fig = plt.figure(figsize=(10, 4))
+            sns.distplot(df[target_var])
+            st.pyplot(fig)
+
+            
