@@ -11,11 +11,30 @@ st.write(st.session_state)
 st.markdown("<h1 style='text-align: center;'>Data Check</h1>", unsafe_allow_html=True)
 
 
+## initializing the session_state variables ###
+
+if 'df' not in st.session_state:
+    st.session_state.df=None
+
+if 'uploaded_file' not in st.session_state:
+    st.session_state.uploaded_file=None
+
+if 'target_var' not in st.session_state:
+    st.session_state.target_var=None
+
+if 'genre' not in st.session_state:
+    st.session_state.genre=None
+
 uploaded_file = st.file_uploader("Choose a file")
-if uploaded_file is not None:
-    if 'df' not in st.session_state:
-        st.session_state.df = pd.read_csv(uploaded_file)
-    st.write(st.session_state.df)
+submit =st.button("Submit")
+
+if submit :
+    st.session_state.df = pd.read_csv(uploaded_file)
+    st.session_state.uploaded_file=uploaded_file
+
+if st.session_state.df is not None:
+    st.write("File Uploaded is :",st.session_state.uploaded_file.name)
+    st.write(st.session_state.df.head(5))
     l_col,r_col=st.columns(2)
     with l_col:
         target_var = st.selectbox("Target Column",tuple(st.session_state.df.columns))
@@ -24,19 +43,19 @@ if uploaded_file is not None:
         genre = st.radio("Classification or Regression",('Classification', 'Regression'))
 
     if st.button("Target Analysis"):
-        if target_var not in st.session_state.df.columns:
-            st.write ("Target variable not found")
-        else :
-            if genre=='Classification':
-                if 'fig' not in st.session_state:
-                    st.session_state.fig = plt.figure(figsize=(10, 4))
-                sns.countplot(x=target_var,data=st.session_state.df)
-                st.pyplot(st.session_state.fig)
+        st.session_state.target_var=target_var
+        st.session_state.genre=genre
 
-            if genre == "Regression":
-                fig = plt.figure(figsize=(10, 4))
-                sns.distplot(st.session_state.df[target_var])
-                st.pyplot(fig)
+    if st.session_state.genre=='Classification' and st.session_state.genre is not None:
+        if 'fig' not in st.session_state:
+            st.session_state.fig = plt.figure(figsize=(10, 4))
+        sns.countplot(x=target_var,data=st.session_state.df)
+        st.pyplot(st.session_state.fig)
+
+    if st.session_state.genre == "Regression" and st.session_state.genre is not None:
+        fig = plt.figure(figsize=(10, 4))
+        sns.distplot(st.session_state.df[st.session_state.target_var])
+        st.pyplot(fig)
             
     if st.button("Generate Data Profile"):
         pr = ProfileReport(st.session_state.df)
