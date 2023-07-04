@@ -40,12 +40,15 @@ if st.session_state.df is not None:
         target_var = st.selectbox("Target Column",tuple(st.session_state.df.columns))
 
     with r_col:
-        genre = st.radio("Classification or Regression",('Classification', 'Regression'))
+        genre = st.selectbox("Type of Problem",('Classification', 'Regression'))
 
     if st.button("Target Analysis"):
         st.session_state.target_var=target_var
         st.session_state.genre=genre
 
+    if st.session_state.target_var is not None and st.session_state.genre is not None:
+        st.write("target Column Selected : ",st.session_state.target_var)
+        st.write("Type of Problem : ",st.session_state.genre)
     if st.session_state.genre=='Classification' and st.session_state.genre is not None:
         if 'fig' not in st.session_state:
             st.session_state.fig = plt.figure(figsize=(10, 4))
