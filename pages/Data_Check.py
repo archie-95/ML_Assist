@@ -5,7 +5,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from streamlit_pandas_profiling import st_profile_report
 from ydata_profiling import ProfileReport
-
+import dtale as dt
 
 st.write(st.session_state)
 st.markdown("<h1 style='text-align: center;'>Data Check</h1>", unsafe_allow_html=True)
@@ -50,10 +50,9 @@ if st.session_state.df is not None:
         st.write("target Column Selected : ",st.session_state.target_var)
         st.write("Type of Problem : ",st.session_state.genre)
     if st.session_state.genre=='Classification' and st.session_state.genre is not None:
-        if 'fig' not in st.session_state:
-            st.session_state.fig = plt.figure(figsize=(10, 4))
-        sns.countplot(x=target_var,data=st.session_state.df)
-        st.pyplot(st.session_state.fig)
+        fig = plt.figure(figsize=(10, 4))
+        sns.countplot(x=st.session_state.target_var,data=st.session_state.df)
+        st.pyplot(fig)
 
     if st.session_state.genre == "Regression" and st.session_state.genre is not None:
         fig = plt.figure(figsize=(10, 4))
@@ -61,5 +60,4 @@ if st.session_state.df is not None:
         st.pyplot(fig)
             
     if st.button("Generate Data Profile"):
-        pr = ProfileReport(st.session_state.df)
-        st_profile_report(pr)
+        dt.show(st.session_state.df).open_browser()
