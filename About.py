@@ -14,5 +14,20 @@
 
 # Data check file 
 
+import streamlit as st 
+st.markdown(
+    """
+    <style>
 
+    [data-testid="stSidebarNav"] {
+                background-image: url("C:\Work\Project\logo.png");
+                background-repeat: no-repeat;
+                padding-top: 120px;
+                background-position: 20px 20px;
+            }
+
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
