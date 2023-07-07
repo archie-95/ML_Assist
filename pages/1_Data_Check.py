@@ -25,6 +25,14 @@ if 'target_var' not in st.session_state:
 if 'genre' not in st.session_state:
     st.session_state.genre=None
 
+## Function to make grids in Streamlit##
+def make_grid(cols,rows):
+    grid = [0]*cols
+    for i in range(cols):
+        with st.container():
+            grid[i] = st.columns(rows)
+    return grid
+
 uploaded_file = st.file_uploader("Choose a file")
 submit =st.button("Submit")
 
@@ -38,11 +46,18 @@ if st.session_state.df is not None:
     l_col,r_col=st.columns(2)
     with l_col:
         target_var = st.selectbox("Target Column",tuple(st.session_state.df.columns))
-
-    with r_col:
         genre = st.selectbox("Type of Problem",('Classification', 'Regression'))
 
-    if st.button("Target Analysis"):
+    with r_col:
+        grid=make_grid(5,3)
+        # grid[0][0].write('00')
+        # grid[1][1].write('11')
+        # grid[2][2].write('22')
+        # grid[3][3].write('22')
+        with grid[4][1]:
+            target_analysis=st.button("Target Analysis")
+        target_analysis=None
+    if target_analysis:
         st.session_state.target_var=target_var
         st.session_state.genre=genre
 
@@ -53,6 +68,7 @@ if st.session_state.df is not None:
         fig = plt.figure(figsize=(10, 4))
         sns.countplot(x=st.session_state.target_var,data=st.session_state.df)
         st.pyplot(fig)
+
 
     if st.session_state.genre == "Regression" and st.session_state.genre is not None:
         fig = plt.figure(figsize=(10, 4))
