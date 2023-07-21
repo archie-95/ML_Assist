@@ -56,7 +56,7 @@ if st.session_state.df is not None:
         # grid[3][3].write('22')
         with grid[4][1]:
             target_analysis=st.button("Target Analysis")
-        target_analysis=None
+        #target_analysis=None
     if target_analysis:
         st.session_state.target_var=target_var
         st.session_state.genre=genre
