@@ -1,4 +1,7 @@
 import pandas as pd
+import evalml
+import woodwork as ww
+from evalml.automl import AutoMLSearch
 import streamlit as st
 from streamlit_option_menu import option_menu
 import seaborn as sns
@@ -6,6 +9,7 @@ import matplotlib.pyplot as plt
 from streamlit_pandas_profiling import st_profile_report
 from ydata_profiling import ProfileReport
 import dtale as dt
+
 
 
 st.write(st.session_state)
@@ -19,6 +23,8 @@ if 'target_var_aml' not in st.session_state:
     st.session_state.target_var_aml=None
 if 'genre_aml' not in st.session_state:
     st.session_state.genre_aml=None
+if 'objective_function' not in st.session_state:
+    st.session_state.objective_function=None
 
 
 def make_grid(cols,rows):
@@ -27,6 +33,40 @@ def make_grid(cols,rows):
         with st.container():
             grid[i] = st.columns(rows)
     return grid
+
+
+#Objectives for different Types of Problem 
+
+binary_objective = ('MCC Binary',
+ 'Log Loss Binary',
+ 'Gini',
+ 'AUC',
+ 'Precision',
+ 'F1',
+ 'Balanced Accuracy Binary',
+ 'Accuracy Binary')
+
+regression_objective = ('ExpVariance',
+ 'MaxError',
+ 'MedianAE',
+ 'MSE',
+ 'MAE',
+ 'R2',
+ 'Root Mean Squared Error')
+
+multiclass_objective = ('MCC Multiclass',
+ 'Log Loss Multiclass',
+ 'AUC Weighted',
+ 'AUC Macro',
+ 'AUC Micro',
+ 'Precision Weighted',
+ 'Precision Macro',
+ 'Precision Micro',
+ 'F1 Weighted',
+ 'F1 Macro',
+ 'F1 Micro',
+ 'Balanced Accuracy Multiclass',
+ 'Accuracy Multiclass')
 
 uploaded_file_aml = st.file_uploader("Choose a file")
 submit =st.button("Submit")
@@ -42,7 +82,14 @@ if st.session_state.df_aml is not None:
     l_col,r_col=st.columns(2)
     with l_col:
         target_var_aml=st.selectbox ("Target",tuple(st.session_state.df_aml.columns))
-        genre_aml = st.selectbox("Type of Problem",('Classification', 'Regression'))
+        genre_aml = st.selectbox("Type of Problem",('Binary','Multiclass' ,'Regression'))
+        if genre_aml=="Binary":
+            objective_function=st.selectbox("Objective Function",binary_objective)
+        if genre_aml=="Multiclass":
+            objective_function=st.selectbox("Objective Function",multiclass_objective)
+        if genre_aml=="Regression":
+            objective_function=st.selectbox("Objective Function",regression_objective)
+        
 
     with r_col:
         grid=make_grid(5,3)
@@ -55,10 +102,18 @@ if st.session_state.df_aml is not None:
     if begin_automl:
         st.session_state.target_var_aml=target_var_aml
         st.session_state.genre_aml=genre_aml
+        st.session_state.objective_function=objective_function
     
     if st.session_state.target_var_aml is not None and st.session_state.genre_aml is not None:
         st.write("target Column Selected : ",st.session_state.target_var_aml)
         st.write("Type of Problem : ",st.session_state.genre_aml)
-
+        X=st.session_state.df_aml.drop(st.session_state.target_var_aml,axis=1)
+        Y=st.session_state.df_aml[st.session_state.target_var_aml]
+        X.ww.init()
+        Y.ww.init()
+        X_train, X_test, y_train, y_test = evalml.preprocessing.split_data(X, Y, problem_type=st.session_state.genre_aml.lower(),test_size=.2)
+        st.write("Split Done")
+        automl = AutoMLSearch(X_train=X_train, y_train=y_train, problem_type=st.session_state.genre_aml.lower(), objective=st.session_state.objective_function,verbose=True,)
+        st.write(automl.search())
 
     
