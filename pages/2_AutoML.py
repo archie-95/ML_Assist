@@ -25,6 +25,8 @@ if 'genre_aml' not in st.session_state:
     st.session_state.genre_aml=None
 if 'objective_function' not in st.session_state:
     st.session_state.objective_function=None
+if 'automl' not in st.session_state:
+    st.session_state.automl=None
 
 
 def make_grid(cols,rows):
@@ -71,6 +73,12 @@ multiclass_objective = ('MCC Multiclass',
 uploaded_file_aml = st.file_uploader("Choose a file")
 submit =st.button("Submit")
 
+def begin_automl_onclick():
+        st.session_state.target_var_aml=target_var_aml
+        st.session_state.genre_aml=genre_aml
+        st.session_state.objective_function=objective_function
+        st.session_state.automl=None
+
 if submit:
     st.session_state.df_aml = pd.read_csv(uploaded_file_aml)
     st.session_state.uploaded_file_aml=uploaded_file_aml
@@ -98,22 +106,28 @@ if st.session_state.df_aml is not None:
         # grid[2][2].write('22')
         # grid[3][3].write('22')
         with grid[4][1]:
-            begin_automl=st.button("Begin AutoML")
-    if begin_automl:
-        st.session_state.target_var_aml=target_var_aml
-        st.session_state.genre_aml=genre_aml
-        st.session_state.objective_function=objective_function
+            begin_automl=st.button("Begin AutoML",on_click=begin_automl_onclick)
+
+
+
     
     if st.session_state.target_var_aml is not None and st.session_state.genre_aml is not None:
         st.write("target Column Selected : ",st.session_state.target_var_aml)
         st.write("Type of Problem : ",st.session_state.genre_aml)
+    
+    if st.session_state.target_var_aml is not None and st.session_state.genre_aml is not None and st.session_state.automl is None:
         X=st.session_state.df_aml.drop(st.session_state.target_var_aml,axis=1)
         Y=st.session_state.df_aml[st.session_state.target_var_aml]
         X.ww.init()
         Y.ww.init()
         X_train, X_test, y_train, y_test = evalml.preprocessing.split_data(X, Y, problem_type=st.session_state.genre_aml.lower(),test_size=.2)
         st.write("Split Done")
-        automl = AutoMLSearch(X_train=X_train, y_train=y_train, problem_type=st.session_state.genre_aml.lower(), objective=st.session_state.objective_function,verbose=True,)
-        st.write(automl.search())
+        with st.spinner("Wait for It"):
+            st.session_state.automl = AutoMLSearch(X_train=X_train, y_train=y_train, problem_type=st.session_state.genre_aml.lower(), objective=st.session_state.objective_function,verbose=True,)
+            st.session_state.automl.search()
+        st.success('Done')
+
+    if st.session_state.automl is not None:
+        st.write(st.session_state.automl.rankings)
 
     
