@@ -129,5 +129,6 @@ if st.session_state.df_aml is not None:
 
     if st.session_state.automl is not None:
         st.write(st.session_state.automl.rankings)
+        st.write("Best Pipeline : ",st.session_state.automl.best_pipeline)
 
     
