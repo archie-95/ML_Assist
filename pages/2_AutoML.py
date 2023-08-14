@@ -2,6 +2,7 @@ import pandas as pd
 import evalml
 import woodwork as ww
 from evalml.automl import AutoMLSearch
+from evalml.problem_types import detect_problem_type
 import streamlit as st
 from streamlit_option_menu import option_menu
 import seaborn as sns
@@ -118,6 +119,8 @@ if st.session_state.df_aml is not None:
     if st.session_state.target_var_aml is not None and st.session_state.genre_aml is not None and st.session_state.automl is None:
         X=st.session_state.df_aml.drop(st.session_state.target_var_aml,axis=1)
         Y=st.session_state.df_aml[st.session_state.target_var_aml]
+        detected_type=detect_problem_type(Y)
+        st.warning(detected_type)
         X.ww.init()
         Y.ww.init()
         X_train, X_test, y_train, y_test = evalml.preprocessing.split_data(X, Y, problem_type=st.session_state.genre_aml.lower(),test_size=.2)
